@@ -12,6 +12,6 @@ app.get('/api/status', (req, res) => {
     });
 });
 
-app.listen(PORT, () => {s
+app.listen(PORT, () => {
     console.log(`Server started sucessfully at port ${PORT}`);
 });
