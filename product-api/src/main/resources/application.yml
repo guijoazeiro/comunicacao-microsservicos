@@ -5,3 +5,23 @@ spring:
   applicatin:
     name: product-api
 
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/product-db
+    username: postgres
+    password: postgres
+    initilization-mode: always
+    initialize: true
+    continue-on-error: true
+    platform: postgres
+    maxActive: 3
+
+
+  jpa:
+    hibernate:
+      del-auto: create-drop
+      format-sql: true
+    show-sql: true
+    properties:
+      hibernat:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
