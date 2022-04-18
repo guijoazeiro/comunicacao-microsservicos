@@ -2,7 +2,7 @@ server:
   port: ${PORT:8081}
 
 spring:
-  applicatin:
+  application:
     name: product-api
 
   datasource:
@@ -10,18 +10,18 @@ spring:
     url: jdbc:postgresql://localhost:5433/product-db
     username: postgres
     password: postgres
-    initilization-mode: always
+    initialization-mode: always
     initialize: true
     continue-on-error: true
-    platform: postgres
+    platform: postgresql
     maxActive: 3
 
 
   jpa:
     hibernate:
-      del-auto: create-drop
-      format-sql: true
-    show-sql: true
+      ddl-auto: create-drop
+      format_sql: true
+    show_sql: true
     properties:
-      hibernat:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL9Dialect
