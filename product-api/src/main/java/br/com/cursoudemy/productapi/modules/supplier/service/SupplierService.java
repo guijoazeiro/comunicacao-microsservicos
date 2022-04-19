@@ -16,6 +16,13 @@ public class SupplierService {
     @Autowired
     private SupplierRepository supplierRepository;
 
+    public Supplier findById(Integer id) {
+        validateInformedId(id);
+        return supplierRepository
+                .findById(id)
+                .orElseThrow(() -> new ValidationException("There's no supplier for the given ID."));
+    }
+
     public SupplierResponse save(SupplierRequest request) {
         validateSupplierNameInformed(request);
         var supplier = supplierRepository.save(Supplier.of(request));
@@ -25,6 +32,12 @@ public class SupplierService {
     private void validateSupplierNameInformed(SupplierRequest request) {
         if (isEmpty(request.getName())) {
             throw new ValidationException("The category description was not informed.");
+        }
+    }
+
+    private void validateInformedId(Integer id) {
+        if (isEmpty(id)) {
+            throw new ValidationException("The supplier ID must be informed.");
         }
     }
 }
