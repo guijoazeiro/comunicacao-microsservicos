@@ -1,7 +1,6 @@
-package br.com.cursoudemy.productapi.modules.product.model;
+package br.com.cursoudemy.productapi.modules.category.model;
 
-import br.com.cursoudemy.productapi.modules.product.dto.CategoryRequest;
-import br.com.cursoudemy.productapi.modules.product.dto.CategoryResponse;
+import br.com.cursoudemy.productapi.modules.category.dto.CategoryRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
