@@ -1,5 +1,6 @@
 package br.com.cursoudemy.productapi.modules.product.service;
 
+import br.com.cursoudemy.productapi.config.exception.SuccessResponse;
 import br.com.cursoudemy.productapi.modules.product.model.Product;
 import br.com.cursoudemy.productapi.config.exception.ValidationException;
 import br.com.cursoudemy.productapi.modules.category.service.CategoryService;
@@ -120,5 +121,14 @@ public class ProductService {
 
     public Boolean existsBySupplierId(Integer categoryId) {
         return productRepository.existsByCategoryId(categoryId);
+    }
+
+    public SuccessResponse delete(Integer id) {
+        validateInformedId(id);
+        if (!productRepository.existsById(id)) {
+            throw new ValidationException("The product does not exists.");
+        }
+        productRepository.deleteById(id);
+        return SuccessResponse.create("The product was deleted.");
     }
 }

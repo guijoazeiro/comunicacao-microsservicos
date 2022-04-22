@@ -1,7 +1,8 @@
 package br.com.cursoudemy.productapi.modules.supplier.service;
 
+import br.com.cursoudemy.productapi.config.exception.SuccessResponse;
 import br.com.cursoudemy.productapi.config.exception.ValidationException;
-import br.com.cursoudemy.productapi.modules.category.dto.CategoryRequest;
+import br.com.cursoudemy.productapi.modules.product.service.ProductService;
 import br.com.cursoudemy.productapi.modules.supplier.dto.SupplierRequest;
 import br.com.cursoudemy.productapi.modules.supplier.dto.SupplierResponse;
 import br.com.cursoudemy.productapi.modules.supplier.model.Supplier;
@@ -18,6 +19,9 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 public class SupplierService {
     @Autowired
     private SupplierRepository supplierRepository;
+
+    @Autowired
+    private ProductService productService;
 
     public List<SupplierResponse> findAll() {
         return supplierRepository
@@ -60,6 +64,14 @@ public class SupplierService {
         if (isEmpty(request.getName())) {
             throw new ValidationException("The category description was not informed.");
         }
+    }
+    public SuccessResponse delete(Integer id) {
+        validateInformedId(id);
+        if (productService.existsBySupplierId(id)) {
+            throw new ValidationException("You cannot delete this supplier because it's already defined by a product.");
+        }
+        supplierRepository.deleteById(id);
+        return SuccessResponse.create("The supplier was deleted.");
     }
 
     private void validateInformedId(Integer id) {
