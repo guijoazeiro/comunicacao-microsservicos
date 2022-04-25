@@ -1,5 +1,6 @@
 package br.com.cursoudemy.productapi.modules.category.service;
 
+
 import br.com.cursoudemy.productapi.config.exception.SuccessResponse;
 import br.com.cursoudemy.productapi.config.exception.ValidationException;
 import br.com.cursoudemy.productapi.modules.category.dto.CategoryRequest;
@@ -8,18 +9,20 @@ import br.com.cursoudemy.productapi.modules.category.model.Category;
 import br.com.cursoudemy.productapi.modules.category.repository.CategoryRepository;
 import br.com.cursoudemy.productapi.modules.product.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+
+import static org.springframework.util.ObjectUtils.isEmpty;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Service
 public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
+    @Lazy
     @Autowired
     private ProductService productService;
 
@@ -59,6 +62,17 @@ public class CategoryService {
         var category = categoryRepository.save(Category.of(request));
         return CategoryResponse.of(category);
     }
+
+    public CategoryResponse update(CategoryRequest request,
+                                   Integer id) {
+        validateCategoryNameInformed(request);
+        validateInformedId(id);
+        var category = Category.of(request);
+        category.setId(id);
+        categoryRepository.save(category);
+        return CategoryResponse.of(category);
+    }
+
 
     private void validateCategoryNameInformed(CategoryRequest request) {
         if (isEmpty(request.getDescription())) {

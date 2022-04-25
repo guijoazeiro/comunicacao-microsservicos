@@ -1,14 +1,17 @@
 package br.com.cursoudemy.productapi.modules.product.service;
 
+
+
 import br.com.cursoudemy.productapi.config.exception.SuccessResponse;
-import br.com.cursoudemy.productapi.modules.product.model.Product;
 import br.com.cursoudemy.productapi.config.exception.ValidationException;
 import br.com.cursoudemy.productapi.modules.category.service.CategoryService;
 import br.com.cursoudemy.productapi.modules.product.dto.ProductRequest;
 import br.com.cursoudemy.productapi.modules.product.dto.ProductResponse;
+import br.com.cursoudemy.productapi.modules.product.model.Product;
 import br.com.cursoudemy.productapi.modules.product.repository.ProductRepository;
 import br.com.cursoudemy.productapi.modules.supplier.service.SupplierService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,8 +25,12 @@ public class ProductService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Lazy
     @Autowired
     private SupplierService supplierService;
+
+    @Lazy
     @Autowired
     private CategoryService categoryService;
 
@@ -131,4 +138,18 @@ public class ProductService {
         productRepository.deleteById(id);
         return SuccessResponse.create("The product was deleted.");
     }
+
+    public ProductResponse update(ProductRequest request,
+                                  Integer id) {
+        validateProductDataInformed(request);
+        validateInformedId(id);
+        validateCategoryAndSupplierIdInformed(request);
+        var category = categoryService.findById(request.getCategoryId());
+        var supplier = supplierService.findById(request.getSupplierId());
+        var product = Product.of(request, supplier, category);
+        product.setId(id);
+        productRepository.save(product);
+        return ProductResponse.of(product);
+    }
+
 }

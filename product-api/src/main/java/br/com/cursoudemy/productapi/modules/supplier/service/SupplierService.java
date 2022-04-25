@@ -1,5 +1,7 @@
 package br.com.cursoudemy.productapi.modules.supplier.service;
 
+
+
 import br.com.cursoudemy.productapi.config.exception.SuccessResponse;
 import br.com.cursoudemy.productapi.config.exception.ValidationException;
 import br.com.cursoudemy.productapi.modules.product.service.ProductService;
@@ -8,6 +10,7 @@ import br.com.cursoudemy.productapi.modules.supplier.dto.SupplierResponse;
 import br.com.cursoudemy.productapi.modules.supplier.model.Supplier;
 import br.com.cursoudemy.productapi.modules.supplier.repository.SupplierRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,9 +20,11 @@ import static org.springframework.util.ObjectUtils.isEmpty;
 
 @Service
 public class SupplierService {
+
     @Autowired
     private SupplierRepository supplierRepository;
 
+    @Lazy
     @Autowired
     private ProductService productService;
 
@@ -46,7 +51,6 @@ public class SupplierService {
         return SupplierResponse.of(findById(id));
     }
 
-
     public Supplier findById(Integer id) {
         validateInformedId(id);
         return supplierRepository
@@ -60,11 +64,22 @@ public class SupplierService {
         return SupplierResponse.of(supplier);
     }
 
+    public SupplierResponse update(SupplierRequest request,
+                                   Integer id) {
+        validateSupplierNameInformed(request);
+        validateInformedId(id);
+        var supplier = Supplier.of(request);
+        supplier.setId(id);
+        supplierRepository.save(supplier);
+        return SupplierResponse.of(supplier);
+    }
+
     private void validateSupplierNameInformed(SupplierRequest request) {
         if (isEmpty(request.getName())) {
-            throw new ValidationException("The category description was not informed.");
+            throw new ValidationException("The supplier's name was not informed.");
         }
     }
+
     public SuccessResponse delete(Integer id) {
         validateInformedId(id);
         if (productService.existsBySupplierId(id)) {
@@ -80,3 +95,4 @@ public class SupplierService {
         }
     }
 }
+
