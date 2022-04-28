@@ -5,12 +5,10 @@ package br.com.cursoudemy.productapi.modules.product.service;
 import br.com.cursoudemy.productapi.config.exception.SuccessResponse;
 import br.com.cursoudemy.productapi.config.exception.ValidationException;
 import br.com.cursoudemy.productapi.modules.category.service.CategoryService;
-import br.com.cursoudemy.productapi.modules.product.dto.ProductQuantityDTO;
-import br.com.cursoudemy.productapi.modules.product.dto.ProductRequest;
-import br.com.cursoudemy.productapi.modules.product.dto.ProductResponse;
-import br.com.cursoudemy.productapi.modules.product.dto.ProductStockDTO;
+import br.com.cursoudemy.productapi.modules.product.dto.*;
 import br.com.cursoudemy.productapi.modules.product.model.Product;
 import br.com.cursoudemy.productapi.modules.product.repository.ProductRepository;
+import br.com.cursoudemy.productapi.modules.sales.client.SalesClient;
 import br.com.cursoudemy.productapi.modules.sales.dto.SalesConfirmationDTO;
 import br.com.cursoudemy.productapi.modules.sales.enums.SalesStatus;
 import br.com.cursoudemy.productapi.modules.sales.enums.rabbitmq.SalesConfirmationSender;
@@ -46,6 +44,10 @@ public class ProductService {
     @Lazy
     @Autowired
     private SalesConfirmationSender salesConfirmationSender;
+
+    @Lazy
+    @Autowired
+    private SalesClient salesClient;
 
     public ProductResponse save(ProductRequest request) {
         validateProductDataInformed(request);
@@ -218,6 +220,18 @@ public class ProductService {
         if (salesProduct.getQuantity() > existingProduct.getQuantityAvailable()) {
             throw new ValidationException(
                     String.format("The product %s is out of stock.", existingProduct.getId()));
+        }
+    }
+
+    public ProductSalesResponse findProductSales(Integer id) {
+        var product = findById(id);
+        try {
+            var sales = salesClient
+                    .findSalesByProductId(product.getId())
+                    .orElseThrow(() -> new ValidationException("The sales was not found by this product."));
+            return ProductSalesResponse.of(product, sales.getSalesIds());
+        } catch (Exception ex) {
+            throw new ValidationException("There was an error trying to get the product's sales.");
         }
     }
 
