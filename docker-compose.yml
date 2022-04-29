@@ -25,10 +25,7 @@ services:
   sales-db:
     image: mongo:latest
     container_name: sales-db
-    restart: always    
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=12345
+    restart: always        
     ports:
       - "27017:27017"
       - "27018:27018" 
