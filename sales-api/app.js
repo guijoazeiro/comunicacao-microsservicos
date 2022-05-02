@@ -2,6 +2,8 @@ import express from 'express';
 
 import { connectMongoDb } from './src/config/db/mongoDbConfig.js';
 import { createInitialData } from './src/config/db/initialData.js';
+import { connectRabbitMQ } from './src/config/rabbitmq/rabbitConfig.js';
+
 const app = express();
 const env = process.env;
 const PORT = env.PORT || 8082;
