@@ -4,6 +4,8 @@ import { PRODUCT_TOPIC, PRODUCT_STOCK_UPDATE_QUEUE, PRODUCT_STOCK_UPDATE_ROUTING
 
 import { RABBIT_MQ_URL } from "../constants/secrets.js"
 
+import { listenToSalesConfirmationQueue } from "../../modules/sales/rabbitmq/salesConfirmationListener.js";
+
 const TWO_SECONDS = 2000;
 const HALF_MINUTE = 30000;
 const CONTAINER_ENV = "container";
@@ -42,7 +44,10 @@ async function connectRabbitMqAndCreateQueues() {
         setTimeout(function () {
             connection.close();
         }, TWO_SECONDS);
-    });    
+    });
+    setTimeout(function () {
+        listenToSalesConfirmationQueue();
+      }, TWO_SECONDS);    
 }
 
 function createQueue(connection, queue, routingKey, topic) {
