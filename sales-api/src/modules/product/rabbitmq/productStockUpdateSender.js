@@ -1,10 +1,10 @@
 import amqp from "amqplib/callback_api.js";
 
-import { RABBIT_MQ_URL } from "../../../../config/constants/secrets.js";
+import { RABBIT_MQ_URL } from "../../../config/constants/secrets.js";
 import {
   PRODUCT_TOPIC,
   PRODUCT_STOCK_UPDATE_ROUTING_KEY,
-} from "../../../../config/rabbitmq/queue.js";
+} from "../../../config/rabbitmq/queue.js";
 
 export function sendMessageToProductStockUpdateQueue(message) {
   amqp.connect(RABBIT_MQ_URL, (error, connection) => {
