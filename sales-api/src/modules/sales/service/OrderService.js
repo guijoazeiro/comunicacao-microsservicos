@@ -4,6 +4,8 @@ import { PENDING, ACCEPTED, REJECTED } from "../status/OrderStatus.js";
 
 import OrderException from '../../sales/exception/OrderException.js';
 
+import ProductClient from "../../product/client/ProductClient.js";
+
 import { BAD_REQUEST, SUCCESS, INTERNAL_SERVER_ERROR, } from "../../../config/constants/httpStatus.js";
 
 class OrderService {
