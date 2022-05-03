@@ -12,31 +12,45 @@ class OrderService {
             let orderData = req.body;
             this.validateOrderData(orderData);
             const { authUser } = req;
-            let order = {
-                status: PENDING,
-                user: authUser,
-                createdAt: new Date(),
-                updateAt: new Date(),
-                products: orderData
-            };
+            const { authorization } = req.headers;
+            let order = this.createInitialOrderData(orderData, authUser);
             await this.validateProductStock(order, authorization);
-            let createOrder = await OrderRepository.save(order);
-            sendMessageToProductStockUpdateQueue(createOrder.products);
+            let createdOrder = await OrderRepository.save(order);
+            this.sendMessage(createdOrder);
             return {
-                status: httpStatus.SUCCESS,
-                createOrder
+                status: SUCCESS,
+                createdOrder,
             };
         } catch (err) {
             return {
                 status: err.status ? err.status : INTERNAL_SERVER_ERROR,
                 message: err.message,
-            }
+            };
         }
     }
+
     validateOrderData(data) {
         if (!data || !data.products) {
             throw new OrderException(BAD_REQUEST, "The products must be informed.");
         }
+    }
+
+    sendMessage(createdOrder) {
+        const message = {
+            salesId: createdOrder.id,
+            products: createdOrder.products,
+        };
+        sendMessageToProductStockUpdateQueue(message);
+    }
+
+    createInitialOrderData(orderData, authUser) {
+        return {
+            status: PENDING,
+            user: authUser,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            products: orderData.products,
+        };
     }
 
     async updateOrder(orderMessage) {
