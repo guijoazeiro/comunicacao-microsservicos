@@ -231,6 +231,7 @@ public class ProductService {
                     .orElseThrow(() -> new ValidationException("The sales was not found by this product."));
             return ProductSalesResponse.of(product, sales.getSalesIds());
         } catch (Exception ex) {
+            ex.printStackTrace();
             throw new ValidationException("There was an error trying to get the product's sales.");
         }
     }
