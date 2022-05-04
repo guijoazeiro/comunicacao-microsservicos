@@ -83,6 +83,32 @@ class OrderService {
             );
         }
     }
+
+    async findById(req) {
+        try {
+            const { id } = req.params;
+            this.validateInformedId(id);
+            const existingOrder = await OrderRepository.findById(id);
+            if (!existingOrder) {
+                throw new OrderException(BAD_REQUEST, "The order was not found.");
+            }
+            return {
+                status: SUCCESS,
+                existingOrder,
+            };
+        } catch (err) {
+            return {
+                status: err.status ? err.status : INTERNAL_SERVER_ERROR,
+                message: err.message,
+            };
+        }
+    }
+
+    validateInformedId(id) {
+        if (!id) {
+            throw new OrderException(BAD_REQUEST, "The order ID must be informed.");
+        }
+    }
 }
 
 export default new OrderService();
