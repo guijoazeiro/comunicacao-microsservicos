@@ -13,7 +13,8 @@
     "express": "^4.17.3",
     "jsonwebtoken": "^8.5.1",
     "pg": "^8.7.3",
-    "sequelize": "^6.18.0"
+    "sequelize": "^6.18.0",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "nodemon": "^2.0.15"
