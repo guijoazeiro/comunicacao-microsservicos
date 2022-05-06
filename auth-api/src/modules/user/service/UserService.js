@@ -62,26 +62,28 @@ class UserService {
             this.validateUserNotFound(user);
             await this.validatePassword(password, user.password);
             const authUser = { id: user.id, name: user.name, email: user.email };
-            const accessToken = jwt.sign({ authUser }, secrets.API_SECRET, { expiresIn: '1d' });
+            const accessToken = jwt.sign({ authUser }, secrets.API_SECRET, {
+                expiresIn: "1d",
+            });
+
+            let response = {
+                status: httpStatus.SUCCESS,
+                accessToken,
+            };
             console.info(
                 `Response to POST login with data ${JSON.stringify(
                     response
                 )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
-            let response = {
-                status: httpStatus.SUCCESS,
-                accessToken,
-            }
             return response;
-
-        } catch (error) {
+        } catch (err) {
             return {
-                status: error.status ? error.status : httpStatus.INTERNAL_SERVER_ERROR,
-                message: error.message,
-            }
+                status: err.status ? err.status : httpStatus.INTERNAL_SERVER_ERROR,
+                message: err.message,
+            };
         }
     }
-
+    
     validateAccessTokenData(email, password) {
         if (!email || !password) {
             throw new UserException(httpStatus.UNAUTHORIZED, 'Email and password must be informed.');
