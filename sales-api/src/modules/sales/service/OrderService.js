@@ -12,17 +12,29 @@ class OrderService {
     async createOrder(req) {
         try {
             let orderData = req.body;
+            const { transactionid, serviceid } = req.headers;
+            console.info(
+                `Request to POST new order with data ${JSON.stringify(
+                    orderData
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
             this.validateOrderData(orderData);
             const { authUser } = req;
             const { authorization } = req.headers;
             let order = this.createInitialOrderData(orderData, authUser);
-            await this.validateProductStock(order, authorization);
+            await this.validateProductStock(order, authorization, transactionid);
             let createdOrder = await OrderRepository.save(order);
             this.sendMessage(createdOrder);
-            return {
+            let response = {
                 status: SUCCESS,
                 createdOrder,
             };
+            console.info(
+                `Response to POST login with data ${JSON.stringify(
+                    response
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
+            return response;
         } catch (err) {
             return {
                 status: err.status ? err.status : INTERNAL_SERVER_ERROR,
@@ -74,8 +86,8 @@ class OrderService {
         }
     }
 
-    async validateProductStock(order, token) {
-        let stockIsOk = await ProductClient.checkProducStock(order, token);
+    async validateProductStock(order, token, transactionid) {
+        let stockIsOk = await ProductClient.checkProducStock(order, token, transactionid);
         if (!stockIsOk) {
             throw new OrderException(
                 BAD_REQUEST,
