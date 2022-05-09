@@ -99,15 +99,27 @@ class OrderService {
     async findById(req) {
         try {
             const { id } = req.params;
+            const { transactionid, serviceid } = req.headers;
+            console.info(
+                `Request to GET order by ID ${id} | ${JSON.stringify(
+                    orderData
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
             this.validateInformedId(id);
             const existingOrder = await OrderRepository.findById(id);
             if (!existingOrder) {
                 throw new OrderException(BAD_REQUEST, "The order was not found.");
             }
-            return {
+            let response = {
                 status: SUCCESS,
                 existingOrder,
             };
+            console.info(
+                `Response to GET order by ID ${id} | ${JSON.stringify(
+                    response
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
+            return response;
         } catch (err) {
             return {
                 status: err.status ? err.status : INTERNAL_SERVER_ERROR,
@@ -118,14 +130,26 @@ class OrderService {
 
     async findAll() {
         try {
+            const { transactionid, serviceid } = req.headers;
+            console.info(
+                `Request to GET all orders ${JSON.stringify(
+                    orderData
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
             const orders = await OrderRepository.findAll();
             if (!orders) {
                 throw new OrderException(BAD_REQUEST, "No orders were found.");
             }
-            return {
+            let response = {
                 status: SUCCESS,
                 orders,
             };
+            console.info(
+                `Response to GET all orders ${JSON.stringify(
+                    response
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
+            return response;
         } catch (err) {
             return {
                 status: err.status ? err.status : INTERNAL_SERVER_ERROR,
@@ -136,18 +160,30 @@ class OrderService {
 
     async findbyProductId(req) {
         try {
+            const { transactionid, serviceid } = req.headers;
             const { productId } = req.params;
+            console.info(
+                `Request to GET order by productID ${productId} | ${JSON.stringify(
+                    orderData
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
             this.validateInformedProductId(productId);
             const orders = await OrderRepository.findByProductId(productId);
             if (!orders) {
                 throw new OrderException(BAD_REQUEST, "No orders were found.");
             }
-            return {
+            let response = {
                 status: SUCCESS,
                 salesIds: orders.map((order) => {
                     return order.id;
                 }),
             };
+            console.info(
+                `Response to GET order by productId ${productId} ${JSON.stringify(
+                    response
+                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+            );
+            return response;
         } catch (err) {
             return {
                 status: err.status ? err.status : INTERNAL_SERVER_ERROR,
