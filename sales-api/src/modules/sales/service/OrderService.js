@@ -21,10 +21,15 @@ class OrderService {
             this.validateOrderData(orderData);
             const { authUser } = req;
             const { authorization } = req.headers;
-            let order = this.createInitialOrderData(orderData, authUser);
+            let order = this.createInitialOrderData(
+                orderData,
+                authUser,
+                transactionid,
+                serviceid
+            );
             await this.validateProductStock(order, authorization, transactionid);
             let createdOrder = await OrderRepository.save(order);
-            this.sendMessage(createdOrder);
+            this.sendMessage(createdOrder, transactionid);
             let response = {
                 status: SUCCESS,
                 createdOrder,
@@ -43,26 +48,14 @@ class OrderService {
         }
     }
 
-    validateOrderData(data) {
-        if (!data || !data.products) {
-            throw new OrderException(BAD_REQUEST, "The products must be informed.");
-        }
-    }
-
-    sendMessage(createdOrder) {
-        const message = {
-            salesId: createdOrder.id,
-            products: createdOrder.products,
-        };
-        sendMessageToProductStockUpdateQueue(message);
-    }
-
-    createInitialOrderData(orderData, authUser) {
+    createInitialOrderData(orderData, authUser, transactionid, serviceid) {
         return {
             status: PENDING,
             user: authUser,
             createdAt: new Date(),
             updatedAt: new Date(),
+            transactionid,
+            serviceid,
             products: orderData.products,
         };
     }
@@ -78,7 +71,9 @@ class OrderService {
                     await OrderRepository.save(existingOrder);
                 }
             } else {
-                console.warn("The order message was not complete.");
+                console.warn(
+                    `The order message was not complete. TransactionID: ${orderMessage.transactionid}`
+                );
             }
         } catch (err) {
             console.error("Could not parse order message from queue.");
@@ -86,8 +81,18 @@ class OrderService {
         }
     }
 
+    validateOrderData(data) {
+        if (!data || !data.products) {
+            throw new OrderException(BAD_REQUEST, "The products must be informed.");
+        }
+    }
+
     async validateProductStock(order, token, transactionid) {
-        let stockIsOk = await ProductClient.checkProducStock(order, token, transactionid);
+        let stockIsOk = await ProductClient.checkProducStock(
+            order,
+            token,
+            transactionid
+        );
         if (!stockIsOk) {
             throw new OrderException(
                 BAD_REQUEST,
@@ -96,14 +101,21 @@ class OrderService {
         }
     }
 
+    sendMessage(createdOrder, transactionid) {
+        const message = {
+            salesId: createdOrder.id,
+            products: createdOrder.products,
+            transactionid,
+        };
+        sendMessageToProductStockUpdateQueue(message);
+    }
+
     async findById(req) {
         try {
             const { id } = req.params;
             const { transactionid, serviceid } = req.headers;
             console.info(
-                `Request to GET order by ID ${id} | ${JSON.stringify(
-                    orderData
-                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+                `Request to GET order by ID ${id} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
             this.validateInformedId(id);
             const existingOrder = await OrderRepository.findById(id);
@@ -115,7 +127,7 @@ class OrderService {
                 existingOrder,
             };
             console.info(
-                `Response to GET order by ID ${id} | ${JSON.stringify(
+                `Response to GET order by ID ${id}: ${JSON.stringify(
                     response
                 )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
@@ -128,13 +140,11 @@ class OrderService {
         }
     }
 
-    async findAll() {
+    async findAll(req) {
         try {
             const { transactionid, serviceid } = req.headers;
             console.info(
-                `Request to GET all orders ${JSON.stringify(
-                    orderData
-                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+                `Request to GET all orders | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
             const orders = await OrderRepository.findAll();
             if (!orders) {
@@ -145,7 +155,7 @@ class OrderService {
                 orders,
             };
             console.info(
-                `Response to GET all orders ${JSON.stringify(
+                `Response to GET all orders: ${JSON.stringify(
                     response
                 )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
@@ -160,12 +170,10 @@ class OrderService {
 
     async findbyProductId(req) {
         try {
-            const { transactionid, serviceid } = req.headers;
             const { productId } = req.params;
+            const { transactionid, serviceid } = req.headers;
             console.info(
-                `Request to GET order by productID ${productId} | ${JSON.stringify(
-                    orderData
-                )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
+                `Request to GET orders by productID ${productId} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
             this.validateInformedProductId(productId);
             const orders = await OrderRepository.findByProductId(productId);
@@ -179,7 +187,7 @@ class OrderService {
                 }),
             };
             console.info(
-                `Response to GET order by productId ${productId} ${JSON.stringify(
+                `Response to GET orders by productID ${productId}: ${JSON.stringify(
                     response
                 )} | [transactionID: ${transactionid} | serviceID: ${serviceid}]`
             );
@@ -192,7 +200,11 @@ class OrderService {
         }
     }
 
-
+    validateInformedId(id) {
+        if (!id) {
+            throw new OrderException(BAD_REQUEST, "The order ID must be informed.");
+        }
+    }
 
     validateInformedProductId(id) {
         if (!id) {
@@ -200,13 +212,6 @@ class OrderService {
                 BAD_REQUEST,
                 "The order's productId must be informed."
             );
-        }
-    }
-
-
-    validateInformedId(id) {
-        if (!id) {
-            throw new OrderException(BAD_REQUEST, "The order ID must be informed.");
         }
     }
 }
