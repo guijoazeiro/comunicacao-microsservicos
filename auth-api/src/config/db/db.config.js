@@ -1,8 +1,18 @@
 import Sequelize from 'sequelize';
 
-const sequelize = new Sequelize('auth-db', 'postgres', 'postgres', {
-    host: 'localhost',
-    dialect: 'postgres',
+import {
+    DB_NAME,
+    DB_HOST,
+    DB_USER,
+    DB_PASSWORD,
+    DB_PORT,
+} from "../constants/secrets.js";
+
+
+const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
+    host: DB_HOST,
+    port: DB_PORT,
+    dialect: "postgres",
     quoteIdentifiers: false,
     define: {
         syncOnAssociation: false,
