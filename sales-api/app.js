@@ -6,6 +6,7 @@ import { connectRabbitMq } from './src/config/rabbitmq/rabbitConfig.js'
 
 import orderRoutes from './src/modules/sales/routes/OrderRoutes.js';
 import checkToken from './src/config/auth/checkToken.js';
+import tracing from './src/config/tracing.js';
 
 const app = express();
 const env = process.env;
